@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberAI Intel — Daily Briefing</title>
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #161920;
+      --surface2: #1e2230;
+      --border: #2a2f3e;
+      --accent: #4f8ef7;
+      --accent2: #7c5cbf;
+      --green: #2ecc71;
+      --red: #e74c3c;
+      --yellow: #f0c040;
+      --text: #e8eaf0;
+      --muted: #7a8099;
+      --font: 'Inter', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+
+    /* AUTH SCREEN */
+    #auth-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 24px;
+    }
+    .auth-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 48px 40px; width: 100%; max-width: 360px;
+      text-align: center;
+    }
+    .auth-logo { font-size: 32px; margin-bottom: 8px; }
+    .auth-card h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .auth-card p { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+    .auth-card input {
+      width: 100%; padding: 12px 16px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+      font-size: 14px; outline: none; margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+    .auth-card input:focus { border-color: var(--accent); }
+    .auth-card button {
+      width: 100%; padding: 12px; background: var(--accent); color: #fff;
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .auth-card button:hover { opacity: 0.85; }
+    .auth-error { color: var(--red); font-size: 12px; margin-top: 8px; display: none; }
+
+    /* MAIN DASHBOARD */
+    #dashboard { display: none; }
+
+    header {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    header h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
+    .header-meta { font-size: 12px; color: var(--muted); }
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .badge-green { background: rgba(46,204,113,0.12); color: var(--green); border: 1px solid rgba(46,204,113,0.25); }
+    .badge-yellow { background: rgba(240,192,64,0.12); color: var(--yellow); border: 1px solid rgba(240,192,64,0.25); }
+    .badge-red { background: rgba(231,76,60,0.12); color: var(--red); border: 1px solid rgba(231,76,60,0.25); }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+    /* SUMMARY BANNER */
+    .summary-banner {
+      background: linear-gradient(135deg, rgba(79,142,247,0.08), rgba(124,92,191,0.08));
+      border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px;
+      margin-bottom: 28px;
+    }
+    .summary-banner h2 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+    .summary-banner p { font-size: 15px; line-height: 1.7; color: var(--text); }
+
+    /* STATS ROW */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px 20px;
+    }
+    .stat-card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+    .stat-card .value { font-size: 26px; font-weight: 700; }
+    .stat-card .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* FINDINGS GRID */
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .section-header h2 { font-size: 14px; font-weight: 700; letter-spacing: 0.3px; }
+    .findings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin-bottom: 32px; }
+    .finding-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px 20px; transition: border-color 0.2s;
+    }
+    .finding-card:hover { border-color: var(--accent); }
+    .finding-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .finding-title { font-size: 13px; font-weight: 600; line-height: 1.4; flex: 1; }
+    .score-pill {
+      font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .score-high { background: rgba(231,76,60,0.15); color: #ff6b5b; }
+    .score-med  { background: rgba(240,192,64,0.15); color: var(--yellow); }
+    .score-low  { background: rgba(79,142,247,0.15); color: var(--accent); }
+    .finding-body { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+    .finding-footer { display: flex; align-items: center; justify-content: space-between; }
+    .finding-source { font-size: 11px; color: var(--accent); text-decoration: none; }
+    .finding-source:hover { text-decoration: underline; }
+    .finding-tag {
+      font-size: 10px; padding: 2px 7px; border-radius: 4px;
+      background: var(--surface2); color: var(--muted); border: 1px solid var(--border);
+    }
+
+    /* SOURCES TABLE */
+    .sources-section { margin-bottom: 32px; }
+    .sources-table { width: 100%; border-collapse: collapse; }
+    .sources-table th {
+      text-align: left; font-size: 11px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.5px; padding: 10px 14px; border-bottom: 1px solid var(--border);
+    }
+    .sources-table td {
+      padding: 11px 14px; font-size: 12px; border-bottom: 1px solid rgba(42,47,62,0.5);
+    }
+    .sources-table tr:last-child td { border-bottom: none; }
+    .sources-table a { color: var(--accent); text-decoration: none; }
+    .sources-table a:hover { text-decoration: underline; }
+    .sources-wrapper { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+
+    /* VALIDATION */
+    .validation-bar {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 20px; margin-bottom: 28px;
+      display: flex; align-items: center; gap: 14px; font-size: 13px;
+    }
+    .validation-bar .vl { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+
+    footer { text-align: center; color: var(--muted); font-size: 11px; padding: 24px; border-top: 1px solid var(--border); margin-top: 16px; }
+  </style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">🛡️</div>
+    <h1>CyberAI Intel</h1>
+    <p>Daily briefing — restricted access</p>
+    <input type="password" id="pwd-input" placeholder="Enter passphrase" onkeydown="if(event.key==='Enter')authenticate()">
+    <button onclick="authenticate()">Access Dashboard</button>
+    <div class="auth-error" id="auth-error">Incorrect passphrase</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <header>
+    <div class="header-left">
+      <div class="logo-dot"></div>
+      <h1>CyberAI Intel</h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="header-meta" id="run-date">Loading...</span>
+      <span class="badge" id="validation-badge">–</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Summary -->
+    <div class="summary-banner">
+      <h2>Today's Summary</h2>
+      <p id="summary-text">Loading intelligence briefing...</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="label">Findings</div>
+        <div class="value" id="stat-findings">–</div>
+        <div class="sub">from this run</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Sources</div>
+        <div class="value" id="stat-sources">–</div>
+        <div class="sub">verified domains</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">High Signal</div>
+        <div class="value" id="stat-high">–</div>
+        <div class="sub">priority items</div>
+      </div>
+    </div>
+
+    <!-- Findings -->
+    <div class="section-header">
+      <h2>Intelligence Findings</h2>
+    </div>
+    <div class="findings-grid" id="findings-grid">
+      <div class="finding-card"><div class="finding-body">No findings yet — first run pending.</div></div>
+    </div>
+
+    <!-- Sources -->
+    <div class="sources-section">
+      <div class="section-header"><h2>Source Audit Trail</h2></div>
+      <div class="sources-wrapper">
+        <table class="sources-table">
+          <thead><tr><th>#</th><th>Source</th><th>Domain</th><th>Used For</th></tr></thead>
+          <tbody id="sources-tbody"><tr><td colspan="4" style="color:var(--muted);text-align:center;padding:20px">Awaiting first run</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Validation -->
+    <div class="validation-bar" id="validation-bar">
+      <span class="vl">Validation</span>
+      <span id="validation-detail">Awaiting first run</span>
+    </div>
+  </main>
+
+  <footer>CyberAI Intel · Autonomous daily briefing · Cybersecurity &amp; AI · Built with Claude + Make.com + Vercel</footer>
+</div>
+
+<script>
+// ── EMBEDDED INTELLIGENCE DATA ──────────────────────────────────────────────
+// This object is replaced on every daily agent run.
+const INTEL = {
+  run_date: "Awaiting first run",
+  summary: "The autonomous agent hasn't run yet. It will execute today at 6am ET and populate this dashboard with fresh Cybersecurity and AI intelligence.",
+  validation_status: "pending",
+  validation_notes: "No run yet.",
+  findings: [],
+  sources: []
+};
+// ────────────────────────────────────────────────────────────────────────────
+
+const PASSPHRASE = "cyberaiintel2026";
+
+function authenticate() {
+  const val = document.getElementById('pwd-input').value;
+  if (val === PASSPHRASE) {
+    sessionStorage.setItem('auth', '1');
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    renderDashboard();
+  } else {
+    document.getElementById('auth-error').style.display = 'block';
+  }
+}
+
+function renderDashboard() {
+  // Date
+  document.getElementById('run-date').textContent = INTEL.run_date ? 'Run: ' + INTEL.run_date : '';
+
+  // Summary
+  document.getElementById('summary-text').textContent = INTEL.summary || '–';
+
+  // Validation badge
+  const vb = document.getElementById('validation-badge');
+  const vs = (INTEL.validation_status || '').toLowerCase();
+  if (vs === 'pass' || vs === 'clean') {
+    vb.className = 'badge badge-green'; vb.textContent = '✓ Validated';
+  } else if (vs === 'warning') {
+    vb.className = 'badge badge-yellow'; vb.textContent = '⚠ Warning';
+  } else if (vs === 'fail') {
+    vb.className = 'badge badge-red'; vb.textContent = '✗ Failed';
+  } else {
+    vb.className = 'badge badge-yellow'; vb.textContent = '– Pending';
+  }
+
+  // Validation detail
+  document.getElementById('validation-detail').textContent = INTEL.validation_notes || '–';
+
+  // Stats
+  const findings = INTEL.findings || [];
+  const sources  = INTEL.sources  || [];
+  document.getElementById('stat-findings').textContent = findings.length;
+  document.getElementById('stat-sources').textContent  = sources.length;
+  document.getElementById('stat-high').textContent     = findings.filter(f => f.signal === 'high').length;
+
+  // Findings grid
+  const grid = document.getElementById('findings-grid');
+  if (!findings.length) {
+    grid.innerHTML = '<div class="finding-card"><div class="finding-body">No findings yet — first run pending.</div></div>';
+  } else {
+    grid.innerHTML = findings.map(f => {
+      const scoreClass = f.signal === 'high' ? 'score-high' : f.signal === 'medium' ? 'score-med' : 'score-low';
+      const scoreLabel = f.signal === 'high' ? 'HIGH' : f.signal === 'medium' ? 'MED' : 'LOW';
+      return `
+        <div class="finding-card">
+          <div class="finding-top">
+            <div class="finding-title">${esc(f.title)}</div>
+            <span class="score-pill ${scoreClass}">${scoreLabel}</span>
+          </div>
+          <div class="finding-body">${esc(f.detail)}</div>
+          <div class="finding-footer">
+            ${f.url ? `<a class="finding-source" href="${esc(f.url)}" target="_blank" rel="noopener">↗ Source</a>` : '<span></span>'}
+            <span class="finding-tag">${esc(f.category || 'General')}</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Sources table
+  const tbody = document.getElementById('sources-tbody');
+  if (!sources.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:20px">Awaiting first run</td></tr>';
+  } else {
+    tbody.innerHTML = sources.map((s, i) => `
+      <tr>
+        <td style="color:var(--muted)">${i+1}</td>
+        <td><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title || s.url)}</a></td>
+        <td style="color:var(--muted)">${esc(new URL(s.url).hostname)}</td>
+        <td style="color:var(--muted)">${esc(s.used_for || '–')}</td>
+      </tr>`).join('');
+  }
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Auto-login if session active
+if (sessionStorage.getItem('auth') === '1') {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  renderDashboard();
+}
+</script>
+</body>
+</html>
